@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="project_2" type="viz_real" name=""/>
+	<node pkg="project_2" type="viz_codom" name=""/>
+	<node pkg="rosbag" type="play" name="rosbag" args=" --clock /home/y2p/catkin_ws/src/project_2/src/second_bag.bag"/>
+</launch>
