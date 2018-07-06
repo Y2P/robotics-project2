@@ -207,6 +207,15 @@ target_link_libraries(viz_codom
 ${catkin_LIBRARIES}
 )
 
+add_executable(viz_codom_imu
+src/bag2computeodom_imu.cpp
+)
+add_dependencies(viz_codom_imu ${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+target_link_libraries(viz_codom_imu
+${catkin_LIBRARIES}
+)
+
 add_executable(viz_real
 src/bag2visualize.cpp
 )

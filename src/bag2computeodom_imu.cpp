@@ -88,11 +88,38 @@ void encCallback(const geometry_msgs::TwistStamped::ConstPtr& msg)
 	}
 
 }
+void IMUCallback( const sensor_msgs::Imu::ConstPtr& imu){
+    //callback every time the robot's angular velocity is received
+    ros::Time current_imu = ros::Time::now();
+    message_counter_imu++;
+    if (message_counter_imu==1)
+    {
+    	i_w_rf_imu = imu->angular_velocity.x;
+    }
+    //this block is to filter out imu noise
+    
+    if((imu->angular_velocity.x -i_w_rf_imu) > -0.12 && (imu->angular_velocity.x -i_w_rf_imu) < 0.11)
+    {
+        w_rf_imu = 0.00;
+    }
+    else
+    {
+  	  w_rf_imu = 3.5*(-imu->angular_velocity.x +i_w_rf_imu);
+    }
+    
+    printf("%f\n",-imu->angular_velocity.x+i_w_rf_imu);
+
+    printf("%f\n", imu_dt);
+
+    imu_dt = (current_imu - prev_imu).toSec();
+    prev_imu = current_imu;
+}
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "viz_codom");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/vel", 1000, encCallback);
+    ros::Subscriber imu_sub = n.subscribe("/imu", 10, IMUCallback);
 
 	static tf::TransformBroadcaster br;
 	ros::Rate r(200);
@@ -111,13 +138,13 @@ int main(int argc, char **argv)
 			// Robot frame velocities are converted to odometry frame
 			x_dot = v_rf_x * cos(theta) - v_rf_y * sin(theta);
 			y_dot = v_rf_x * sin(theta) + v_rf_y * cos(theta);
-			thetadot = w_rf;
-			//thetadot = w_rf_imu;
+			//thetadot = w_rf;
+			thetadot = w_rf_imu;
 			// Queue calculated value
 
 			xdot_queue.push(x_dot);
 			ydot_queue.push(y_dot);
-			thetadot_queue.push(thetadot);
+			//thetadot_queue.push(thetadot);
 
 			
 			// If more value than the window size, pop!, Otherwise cumulate
@@ -132,7 +159,7 @@ int main(int argc, char **argv)
 			// Take average of the windowed speeds
 			x_dot_avg = queueAvg(xdot_queue);
 			y_dot_avg = queueAvg(ydot_queue);
-			thetadot_avg = queueAvg(thetadot_queue);
+			//thetadot_avg = queueAvg(thetadot_queue);
 
 
 			x_dot_avg = x_dot;
@@ -141,7 +168,7 @@ int main(int argc, char **argv)
 			// Position updates
 			x += Kp_pos*x_dot_avg*dt;
 			y += Kp_pos*y_dot_avg*dt;
-			theta += Kp_rot*thetadot_avg*dt; 
+			theta += Kp_rot*thetadot*imu_dt; 
 
 			// Keep the previous timestamp for accurate calculation
 			
