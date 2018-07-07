@@ -39,6 +39,8 @@ void pubCallback(const geometry_msgs::Pose2D::ConstPtr& msg)
 	}	
 	geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(msg->theta);
 
+	if(message_counter%2 == 0)
+		return;
 	//	printf("Time: %.3f X:%.2f,Y:%.2f,Theta:%.2f\n",msg.header.stamp.toSec() ,msg.pose.position.x ,msg.pose.position.x , i->theta-i_theta  );
 
 	// This is the tf between map and inital position

@@ -48,6 +48,7 @@ std::queue<double> xdot_queue;
 std::queue<double> ydot_queue;
 std::queue<double> thetadot_queue;
 int Avg_Window = 25; 
+int Avg_WindowIMU =  10;
 int Avg_counter = 0;
 double Kp_rot = 0.5;
 double Kp_pos = 0.5;
@@ -97,7 +98,7 @@ void IMUCallback( const sensor_msgs::Imu::ConstPtr& imu){
     	i_w_rf_imu = imu->angular_velocity.x;
     }
     //this block is to filter out imu noise
-    
+    /*
     if((imu->angular_velocity.x -i_w_rf_imu) > -0.12 && (imu->angular_velocity.x -i_w_rf_imu) < 0.11)
     {
         w_rf_imu = 0.00;
@@ -106,7 +107,8 @@ void IMUCallback( const sensor_msgs::Imu::ConstPtr& imu){
     {
   	  w_rf_imu = 3.5*(-imu->angular_velocity.x +i_w_rf_imu);
     }
-    
+    */
+    w_rf_imu = 3.75*(-imu->angular_velocity.x +i_w_rf_imu);
     printf("%f\n",-imu->angular_velocity.x+i_w_rf_imu);
 
     printf("%f\n", imu_dt);
@@ -144,7 +146,7 @@ int main(int argc, char **argv)
 
 			xdot_queue.push(x_dot);
 			ydot_queue.push(y_dot);
-			//thetadot_queue.push(thetadot);
+			thetadot_queue.push(thetadot);
 
 			
 			// If more value than the window size, pop!, Otherwise cumulate
@@ -153,22 +155,23 @@ int main(int argc, char **argv)
 			{
 				xdot_queue.pop();
 				ydot_queue.pop();
-				//thetadot_queue.pop();
+			}
+			if (thetadot_queue.size() > Avg_WindowIMU) 
+			{
+				thetadot_queue.pop();
+
 			}
 
 			// Take average of the windowed speeds
 			x_dot_avg = queueAvg(xdot_queue);
 			y_dot_avg = queueAvg(ydot_queue);
-			//thetadot_avg = queueAvg(thetadot_queue);
+			thetadot_avg = queueAvg(thetadot_queue);
 
 
-			x_dot_avg = x_dot;
-			y_dot_avg = y_dot;
-			thetadot_avg = thetadot;
 			// Position updates
 			x += Kp_pos*x_dot_avg*dt;
 			y += Kp_pos*y_dot_avg*dt;
-			theta += Kp_rot*thetadot*imu_dt; 
+			theta += Kp_rot*thetadot_avg*imu_dt; 
 
 			// Keep the previous timestamp for accurate calculation
 			

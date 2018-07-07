@@ -135,9 +135,7 @@ int main(int argc, char **argv)
 			thetadot_avg = queueAvg(thetadot_queue);
 
 
-			x_dot_avg = x_dot;
-			y_dot_avg = y_dot;
-			thetadot_avg = thetadot;
+
 			// Position updates
 			x += Kp_pos*x_dot_avg*dt;
 			y += Kp_pos*y_dot_avg*dt;
