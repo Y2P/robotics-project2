@@ -53,6 +53,7 @@ double Kp_rot = 0.5;
 double Kp_pos = 0.5;
 
 
+int encFlag =0;
 
 
 double queueAvg(std::queue<double> myqueue)
@@ -63,7 +64,7 @@ double queueAvg(std::queue<double> myqueue)
 	// Weighted average (Last coming data more important)
 	for (int i = 0; i < size; ++i)	
 	{	
-		avg += myqueue.front();
+		avg += myqueue.front()*(i+1);
 		weight_sum += (i);
 		myqueue.pop();
 	}
@@ -84,8 +85,10 @@ void encCallback(const geometry_msgs::TwistStamped::ConstPtr& msg)
 		v_rf_x =  msg->twist.linear.x; 
 		v_rf_y =  msg->twist.linear.y; 
 		w_rf = msg->twist.angular.z;
+
 		// Robot frame velocities are converted to odometry frame
 	}
+		encFlag = 1;
 
 }
 int main(int argc, char **argv)
@@ -101,75 +104,83 @@ int main(int argc, char **argv)
 	{
 		ros::spinOnce();
 		//printf("Hey2\n");
-		current = ros::Time::now();
-		message_counter++;
-		if(message_counter == 1)
-			prev = current;
-		dt = (current-prev).toSec();
-		if(dt > 0.005)
+		if(encFlag == 1)
 		{
-			// Robot frame velocities are converted to odometry frame
-			x_dot = v_rf_x * cos(theta) - v_rf_y * sin(theta);
-			y_dot = v_rf_x * sin(theta) + v_rf_y * cos(theta);
-			thetadot = w_rf;
-			//thetadot = w_rf_imu;
-			// Queue calculated value
+			current = ros::Time::now();
+			message_counter++;
+			if(message_counter == 1)
+				prev = current;
+			dt = (current-prev).toSec();
+			prev = current;
 
-			xdot_queue.push(x_dot);
-			ydot_queue.push(y_dot);
-			thetadot_queue.push(thetadot);
-
-			
-			// If more value than the window size, pop!, Otherwise cumulate
-
-			if(xdot_queue.size() > Avg_Window )
+			encFlag = 0;
+			if(dt > 0.005)
 			{
-				xdot_queue.pop();
-				ydot_queue.pop();
-				thetadot_queue.pop();
+				// Robot frame velocities are converted to odometry frame
+				x_dot = v_rf_x * cos(theta) - v_rf_y * sin(theta);
+				y_dot = v_rf_x * sin(theta) + v_rf_y * cos(theta);
+				thetadot = w_rf;
+				//thetadot = w_rf_imu;
+				// Queue calculated value
+
+				xdot_queue.push(x_dot);
+				ydot_queue.push(y_dot);
+				thetadot_queue.push(thetadot);
+
+				
+				// If more value than the window size, pop!, Otherwise cumulate
+
+				if(xdot_queue.size() > Avg_Window )
+				{
+					xdot_queue.pop();
+					ydot_queue.pop();
+					thetadot_queue.pop();
+				}
+
+				// Take average of the windowed speeds
+				x_dot_avg = queueAvg(xdot_queue);
+				y_dot_avg = queueAvg(ydot_queue);
+				thetadot_avg = queueAvg(thetadot_queue);
+
+
+
+				// Position updates
+				x += Kp_pos*x_dot_avg*dt;
+				y += Kp_pos*y_dot_avg*dt;
+				theta += Kp_rot*thetadot_avg*dt; 
+
+				// Keep the previous timestamp for accurate calculation
+				
+
+				geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(theta);
+
+				// Stamped pose is created and published here; 
+				geometry_msgs::PoseStamped enc_pose;
+				enc_pose.header.stamp = current;
+				enc_pose.header.frame_id = "map";
+
+				enc_pose.pose.position.x = x;
+				enc_pose.pose.position.y = y;
+				enc_pose.pose.position.z = 0;
+				enc_pose.pose.orientation = q;
+
+				// Stamped transformation is created and published
+				geometry_msgs::TransformStamped enc_odom_trans;
+				enc_odom_trans.header.stamp = current;
+				enc_odom_trans.header.frame_id = "initial_pos";
+				enc_odom_trans.child_frame_id = "computed_odom";
+
+				enc_odom_trans.transform.translation.x = x;
+				enc_odom_trans.transform.translation.y = y;
+				enc_odom_trans.transform.translation.z = 0.0;
+				enc_odom_trans.transform.rotation = q;
+
+				br.sendTransform(enc_odom_trans);
 			}
 
-			// Take average of the windowed speeds
-			x_dot_avg = queueAvg(xdot_queue);
-			y_dot_avg = queueAvg(ydot_queue);
-			thetadot_avg = queueAvg(thetadot_queue);
-
-
-
-			// Position updates
-			x += Kp_pos*x_dot_avg*dt;
-			y += Kp_pos*y_dot_avg*dt;
-			theta += Kp_rot*thetadot_avg*dt; 
-
-			// Keep the previous timestamp for accurate calculation
-			
-
-			geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(theta);
-
-			// Stamped pose is created and published here; 
-			geometry_msgs::PoseStamped enc_pose;
-			enc_pose.header.stamp = current;
-			enc_pose.header.frame_id = "map";
-
-			enc_pose.pose.position.x = x;
-			enc_pose.pose.position.y = y;
-			enc_pose.pose.position.z = 0;
-			enc_pose.pose.orientation = q;
-
-			// Stamped transformation is created and published
-			geometry_msgs::TransformStamped enc_odom_trans;
-			enc_odom_trans.header.stamp = current;
-			enc_odom_trans.header.frame_id = "initial_pos";
-			enc_odom_trans.child_frame_id = "computed_odom";
-
-			enc_odom_trans.transform.translation.x = x;
-			enc_odom_trans.transform.translation.y = y;
-			enc_odom_trans.transform.translation.z = 0.0;
-			enc_odom_trans.transform.rotation = q;
-
-			br.sendTransform(enc_odom_trans);
 		}
-		prev = current;
+
+
 
 		r.sleep();
 	}

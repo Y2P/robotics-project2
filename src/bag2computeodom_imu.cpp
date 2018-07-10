@@ -72,8 +72,8 @@ double queueAvg(std::queue<double> myqueue)
 
 		for (int i = 0; i < size; ++i)	
 		{	
-			avg += myqueue.front();
-			weight_sum += (1);
+			avg += myqueue.front()*(i+1);
+			weight_sum += (i+1);
 			myqueue.pop();
 		}
 		avg = avg/(weight_sum);
