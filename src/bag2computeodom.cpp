@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub = n.subscribe("/vel", 1000, encCallback);
 
 	static tf::TransformBroadcaster br;
-	ros::Rate r(200);
+	ros::Rate r(1000);
 
 	while(ros::ok())
 	{
