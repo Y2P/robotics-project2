@@ -49,8 +49,8 @@ std::queue<double> ydot_queue;
 std::queue<double> thetadot_queue;
 int Avg_Window = 25; 
 int Avg_counter = 0;
-double Kp_rot = 1;
-double Kp_pos = 1;
+double Kp_rot = 0.5;
+double Kp_pos = 0.5;
 
 
 
@@ -59,12 +59,12 @@ double queueAvg(std::queue<double> myqueue)
 {
 	int size = myqueue.size();
 	double avg = 0;
-	int weight_sum = 0;
+	int weight_sum = 1;
 	// Weighted average (Last coming data more important)
 	for (int i = 0; i < size; ++i)	
 	{	
-		avg += myqueue.front()*(i+1);
-		weight_sum += (i+1);
+		avg += myqueue.front();
+		weight_sum += (i);
 		myqueue.pop();
 	}
 	return avg/weight_sum;
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 			{
 				xdot_queue.pop();
 				ydot_queue.pop();
-				//thetadot_queue.pop();
+				thetadot_queue.pop();
 			}
 
 			// Take average of the windowed speeds
@@ -137,9 +137,9 @@ int main(int argc, char **argv)
 
 
 			// Position updates
-			x += Kp_pos*x_dot*dt;
-			y += Kp_pos*y_dot*dt;
-			theta += Kp_rot*thetadot*dt; 
+			x += Kp_pos*x_dot_avg*dt;
+			y += Kp_pos*y_dot_avg*dt;
+			theta += Kp_rot*thetadot_avg*dt; 
 
 			// Keep the previous timestamp for accurate calculation
 			
