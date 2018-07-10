@@ -49,8 +49,8 @@ std::queue<double> ydot_queue;
 std::queue<double> thetadot_queue;
 int Avg_Window = 25; 
 int Avg_counter = 0;
-double Kp_rot = 0.5;
-double Kp_pos = 0.5;
+double Kp_rot = 1;
+double Kp_pos = 1;
 
 
 
