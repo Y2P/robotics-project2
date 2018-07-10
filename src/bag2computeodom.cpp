@@ -137,9 +137,9 @@ int main(int argc, char **argv)
 
 
 			// Position updates
-			x += Kp_pos*x_dot_avg*dt;
-			y += Kp_pos*y_dot_avg*dt;
-			theta += Kp_rot*thetadot_avg*dt; 
+			x += Kp_pos*x_dot*dt;
+			y += Kp_pos*y_dot*dt;
+			theta += Kp_rot*thetadot*dt; 
 
 			// Keep the previous timestamp for accurate calculation
 			
