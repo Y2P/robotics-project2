@@ -51,7 +51,7 @@ void pubCallback(const geometry_msgs::Pose2D::ConstPtr& msg)
 	map2ip.transform.translation.x =  i_x ;
 	map2ip.transform.translation.y =  i_y;
 	map2ip.transform.translation.z = 0;
-	map2ip.transform.rotation =  tf::createQuaternionMsgFromYaw(0);
+	map2ip.transform.rotation =  tf::createQuaternionMsgFromYaw(i_theta);
 	br.sendTransform(map2ip);
 
 
