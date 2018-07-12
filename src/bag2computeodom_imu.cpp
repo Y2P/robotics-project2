@@ -54,8 +54,8 @@ double Kp_rot = 1;
 double Kp_pos = 0.5;
 geometry_msgs::PoseStamped enc_pose;
 
-int encFlag = 0;
-int ImuFlag = 0;
+int encFlag = 1;
+int ImuFlag = 1;
 
 
 double queueAvg(std::queue<double> myqueue)
