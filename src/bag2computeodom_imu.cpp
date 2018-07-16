@@ -138,8 +138,8 @@ int main(int argc, char **argv)
     ros::Subscriber imu_sub = n.subscribe("/imu", 100, IMUCallback);
 
 	geometry_msgs::TransformStamped enc_odom_trans;
-	enc_odom_trans.header.frame_id = "initial_pos";
-	enc_odom_trans.child_frame_id = "computed_odom";
+	enc_odom_trans.header.frame_id = "computed_odom";
+	enc_odom_trans.child_frame_id = "base_link";
 
 	enc_pose.header.frame_id = "map";
 
