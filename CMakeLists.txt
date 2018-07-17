@@ -224,3 +224,12 @@ ${catkin_EXPORTED_TARGETS})
 target_link_libraries(viz_real
 ${catkin_LIBRARIES}
 )
+
+add_executable(pub_laser
+src/bag2laser.cpp
+)
+add_dependencies(pub_laser ${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+target_link_libraries(pub_laser
+${catkin_LIBRARIES}
+)

@@ -47,7 +47,7 @@ double x_dot_avg,y_dot_avg,thetadot_avg;
 std::queue<double> xdot_queue;
 std::queue<double> ydot_queue;
 std::queue<double> thetadot_queue;
-int Avg_Window = 25; 
+int Avg_Window = 100; 
 int Avg_counter = 0;
 double Kp_rot = 0.5;
 double Kp_pos = 0.5;
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	while(ros::ok())
 	{
 		ros::spinOnce();
-		//printf("Hey2\n");
+		printf("Hey2\n");
 		if(encFlag == 1)
 		{
 			current = ros::Time::now();
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 				// Stamped transformation is created and published
 				geometry_msgs::TransformStamped enc_odom_trans;
 				enc_odom_trans.header.stamp = current;
-				enc_odom_trans.header.frame_id = "initial_pos";
+				enc_odom_trans.header.frame_id = "map";
 				enc_odom_trans.child_frame_id = "computed_odom";
 
 				enc_odom_trans.transform.translation.x = x;
