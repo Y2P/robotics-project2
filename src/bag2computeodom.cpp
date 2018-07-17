@@ -167,8 +167,8 @@ int main(int argc, char **argv)
 				// Stamped transformation is created and published
 				geometry_msgs::TransformStamped enc_odom_trans;
 				enc_odom_trans.header.stamp = current;
-				enc_odom_trans.header.frame_id = "map";
-				enc_odom_trans.child_frame_id = "computed_odom";
+				enc_odom_trans.header.frame_id = "computed_odom";
+				enc_odom_trans.child_frame_id = "base_link_2";
 
 				enc_odom_trans.transform.translation.x = x;
 				enc_odom_trans.transform.translation.y = y;
