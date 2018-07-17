@@ -44,15 +44,15 @@ void pubCallback(const geometry_msgs::Pose2D::ConstPtr& msg)
 	//	printf("Time: %.3f X:%.2f,Y:%.2f,Theta:%.2f\n",msg.header.stamp.toSec() ,msg.pose.position.x ,msg.pose.position.x , i->theta-i_theta  );
 
 	// This is the tf between map and inital position
-	geometry_msgs::TransformStamped map2ip;
-	map2ip.header.stamp = current;
-	map2ip.header.frame_id = "map";
-	map2ip.child_frame_id = "initial_pos";
-	map2ip.transform.translation.x =  i_x ;
-	map2ip.transform.translation.y =  i_y;
-	map2ip.transform.translation.z = 0;
-	map2ip.transform.rotation =  tf::createQuaternionMsgFromYaw(i_theta);
-	br.sendTransform(map2ip);
+	// geometry_msgs::TransformStamped map2ip;
+	// map2ip.header.stamp = current;
+	// map2ip.header.frame_id = "map";
+	// map2ip.child_frame_id = "initial_pos";
+	// map2ip.transform.translation.x =  i_x ;
+	// map2ip.transform.translation.y =  i_y;
+	// map2ip.transform.translation.z = 0;
+	// map2ip.transform.rotation =  tf::createQuaternionMsgFromYaw(i_theta);
+	// br.sendTransform(map2ip);
 
 
 	// This is the tf between initial position and computed odometry
@@ -60,10 +60,10 @@ void pubCallback(const geometry_msgs::Pose2D::ConstPtr& msg)
 	ip2codom.header.stamp = current;
 	ip2codom.header.frame_id = "map";
 	ip2codom.child_frame_id = "real_odom";
-	ip2codom.transform.translation.x =  msg->x ;
-	ip2codom.transform.translation.y =  msg->y;
+	ip2codom.transform.translation.x =  msg->x + i_x ;
+	ip2codom.transform.translation.y =  msg->y + i_y ;
 	ip2codom.transform.translation.z = 0;
-	ip2codom.transform.rotation = q;
+	ip2codom.transform.rotation = tf::createQuaternionMsgFromYaw(msg->theta + i_theta);
 	br.sendTransform(ip2codom);
 
 
@@ -84,7 +84,7 @@ void pubCallback(const geometry_msgs::Pose2D::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "sub");
+	ros::init(argc, argv, "viz_real");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/robot_markerset/ground_pose", 1000, pubCallback);
 	ros::spin();

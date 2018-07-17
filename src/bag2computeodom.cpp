@@ -22,6 +22,7 @@
 #include <nav_msgs/Odometry.h>
 #include <queue>
 #include <tf2_msgs/TFMessage.h>
+#include <nav_msgs/Odometry.h>
 
 ros::Time current,current_imu;
 ros::Time prev,prev_imu;
@@ -47,10 +48,10 @@ double x_dot_avg,y_dot_avg,thetadot_avg;
 std::queue<double> xdot_queue;
 std::queue<double> ydot_queue;
 std::queue<double> thetadot_queue;
-int Avg_Window = 25; 
+int Avg_Window = 1; 
 int Avg_counter = 0;
-double Kp_rot = 0.5;
-double Kp_pos = 0.5;
+double Kp_rot = 1;
+double Kp_pos = 1;
 
 
 int encFlag =0;
@@ -96,6 +97,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "viz_codom");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/vel", 1000, encCallback);
+	ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
 
 	static tf::TransformBroadcaster br;
 	ros::Rate r(1000);
@@ -128,7 +130,7 @@ int main(int argc, char **argv)
 				thetadot_queue.push(thetadot);
 
 				
-				// If more value than the window size, pop!, Otherwise cumulate
+				//If more value than the window size, pop!, Otherwise cumulate
 
 				if(xdot_queue.size() > Avg_Window )
 				{
@@ -155,19 +157,19 @@ int main(int argc, char **argv)
 				geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(theta);
 
 				// Stamped pose is created and published here; 
-				geometry_msgs::PoseStamped enc_pose;
-				enc_pose.header.stamp = current;
-				enc_pose.header.frame_id = "map";
+				// geometry_msgs::PoseStamped enc_pose;
+				// enc_pose.header.stamp = current;
+				// enc_pose.header.frame_id = "map";
 
-				enc_pose.pose.position.x = x;
-				enc_pose.pose.position.y = y;
-				enc_pose.pose.position.z = 0;
-				enc_pose.pose.orientation = q;
+				// enc_pose.pose.position.x = x;
+				// enc_pose.pose.position.y = y;
+				// enc_pose.pose.position.z = 0;
+				// enc_pose.pose.orientation = q;
 
 				// Stamped transformation is created and published
 				geometry_msgs::TransformStamped enc_odom_trans;
 				enc_odom_trans.header.stamp = current;
-				enc_odom_trans.header.frame_id = "computed_odom";
+				enc_odom_trans.header.frame_id = "odom";
 				enc_odom_trans.child_frame_id = "base_link";
 
 				enc_odom_trans.transform.translation.x = x;
@@ -175,7 +177,25 @@ int main(int argc, char **argv)
 				enc_odom_trans.transform.translation.z = 0.0;
 				enc_odom_trans.transform.rotation = q;
 
-				br.sendTransform(enc_odom_trans);
+
+				nav_msgs::Odometry odom;
+			    odom.header.stamp = current;
+			    odom.header.frame_id = "odom";
+
+			    //set the position
+			    odom.pose.pose.position.x = x;
+			    odom.pose.pose.position.y = y;
+			    odom.pose.pose.position.z = 0.0;
+			    odom.pose.pose.orientation = q;
+
+			    //set the velocity
+			    //odom.child_frame_id = "base_footprint";
+			    odom.twist.twist.linear.x = v_rf_x;
+			    odom.twist.twist.linear.y = v_rf_y;
+			    odom.twist.twist.angular.z = w_rf;
+
+			    odom_pub.publish(odom);
+				//br.sendTransform(enc_odom_trans);
 			}
 
 		}
