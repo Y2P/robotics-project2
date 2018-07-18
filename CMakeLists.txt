@@ -233,3 +233,21 @@ ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pub_laser
 ${catkin_LIBRARIES}
 )
+
+add_executable(switch
+src/switch_node.cpp
+)
+add_dependencies(switch ${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+target_link_libraries(switch
+${catkin_LIBRARIES}
+)
+
+add_executable(input
+src/input_node.cpp
+)
+add_dependencies(input ${${PROJECT_NAME}_EXPORTED_TARGETS}
+${catkin_EXPORTED_TARGETS})
+target_link_libraries(input
+${catkin_LIBRARIES}
+)

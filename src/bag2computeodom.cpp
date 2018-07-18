@@ -96,14 +96,13 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "viz_codom");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/vel", 1000, encCallback);
+	ros::Publisher pose_pub = n.advertise<geometry_msgs::PoseStamped>("enc_pose", 50);
 
-	static tf::TransformBroadcaster br;
 	ros::Rate r(1000);
 
 	while(ros::ok())
 	{
 		ros::spinOnce();
-		printf("Hey2\n");
 		if(encFlag == 1)
 		{
 			current = ros::Time::now();
@@ -157,25 +156,15 @@ int main(int argc, char **argv)
 				// Stamped pose is created and published here; 
 				geometry_msgs::PoseStamped enc_pose;
 				enc_pose.header.stamp = current;
-				enc_pose.header.frame_id = "map";
+				enc_pose.header.frame_id = "initial_pos";
 
 				enc_pose.pose.position.x = x;
 				enc_pose.pose.position.y = y;
 				enc_pose.pose.position.z = 0;
 				enc_pose.pose.orientation = q;
 
-				// Stamped transformation is created and published
-				geometry_msgs::TransformStamped enc_odom_trans;
-				enc_odom_trans.header.stamp = current;
-				enc_odom_trans.header.frame_id = "computed_odom";
-				enc_odom_trans.child_frame_id = "base_link_2";
+				pose_pub.publish(enc_pose);
 
-				enc_odom_trans.transform.translation.x = x;
-				enc_odom_trans.transform.translation.y = y;
-				enc_odom_trans.transform.translation.z = 0.0;
-				enc_odom_trans.transform.rotation = q;
-
-				br.sendTransform(enc_odom_trans);
 			}
 
 		}

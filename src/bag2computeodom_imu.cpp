@@ -147,14 +147,10 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/vel", 1000, encCallback);
 	ros::Subscriber imu_sub = n.subscribe("/imu", 100, IMUCallback);
+	ros::Publisher pose_pub = n.advertise<geometry_msgs::PoseStamped>("imu_pose", 50);
 
-	geometry_msgs::TransformStamped enc_odom_trans;
-	enc_odom_trans.header.frame_id = "initial_pos";
-	enc_odom_trans.child_frame_id = "computed_odom_imu";
+	enc_pose.header.frame_id = "initial_pos";
 
-	enc_pose.header.frame_id = "map";
-
-	static tf::TransformBroadcaster br;
 	ros::Rate r(10000);
 	theta = 0;
 
@@ -207,7 +203,6 @@ int main(int argc, char **argv)
 					y += Kp_pos*y_dot_avg*dt_enc;   
 
 					enc_pose.header.stamp = current_enc;
-					enc_odom_trans.header.stamp = current_enc;
 				}
 			}
 			else if(ImuFlag == 1)
@@ -257,16 +252,12 @@ int main(int argc, char **argv)
 
 
 					enc_pose.header.stamp = current_imu;
-					enc_odom_trans.header.stamp = current_imu;
 				}
 
 
 			}
 					
 /*
-			printf("x:%f\n",x);
-			printf("y:%f\n",y);
-			printf("theta:%f\n",theta);
 */
 			geometry_msgs::Quaternion q = tf::createQuaternionMsgFromYaw(theta);
 
@@ -278,14 +269,8 @@ int main(int argc, char **argv)
 			enc_pose.pose.position.z = 0;
 			enc_pose.pose.orientation = q;
 
-			// Stamped transformation is created and published
+			pose_pub.publish(enc_pose);
 
-			enc_odom_trans.transform.translation.x = x;
-			enc_odom_trans.transform.translation.y = y;
-			enc_odom_trans.transform.translation.z = 0.0;
-			enc_odom_trans.transform.rotation = q;
-
-			br.sendTransform(enc_odom_trans);
 		
 
 			r.sleep();

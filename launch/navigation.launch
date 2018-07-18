@@ -1,22 +1,4 @@
 <launch>
-
-
-
-	<param name="use_sim_time" value="true" />
-	<!-- <node pkg="project_2" type="viz_real" name=""/> -->
-	<node pkg="project_2" type="pub_laser" name=""/>
-	<node pkg="project_2" type="viz_codom" name=""/>
-	<node pkg="rosbag" type="play" name="rosbag" args=" --clock $(find project_2)/bags/corridor_short.bag"/>
-	<node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="0 0 0 0 0 0 1 base_link_2 laser_codom 100"/>
-	<!--<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
-		<param name="pub_map_odom_transform" value="true"/>
-		<param name="map_update_interval" value="1"/>
-		<param name="map_frame" value="map"/>
-		<param name="base_frame" value="base_link_2"/>
-	    <param name="odom_frame" value="computed_odom"/>
-	    <remap from="scan" to="new_scan"/>
-	</node> -->
-
   <arg name="use_map_topic"   default="false"/>
   <arg name="scan_topic"      default="new_scan"/> 
   <arg name="initial_pose_x"  default="0.0"/>
@@ -67,5 +49,5 @@
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
     <remap from="scan"                      to="$(arg scan_topic)"/>
   </node>
-
 </launch>
+

@@ -1,0 +1,8 @@
+### Run the input node from a seperate terminal
+### Default input choses encoder odometry.
+### While input node is running;
+### For imu sensor odometry enter IMU
+### For encoder sensor odometry enter ENC
+
+### Run launch files with following in the directory of launch;
+roslaunch project_2 <filename>
