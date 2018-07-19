@@ -1,5 +1,5 @@
 # Robotics Project 2
-# This project presents ROS executables that can collaboratively run together to solve;
+This project presents ROS executables that can collaboratively run together to solve;
 1) Odometry Computation from different sensor sources. Namely, 
 	-  Encoder 
 	-  IMU + Encoder
