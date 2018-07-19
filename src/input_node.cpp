@@ -28,16 +28,26 @@
 std::string input_string;
 int main(int argc, char *argv[])
 {
+	// This node publishes the user input for odometry source if it is valid
 	ros::init(argc, argv, "sub");
 	ros::NodeHandle n;
+	// Publisher for user input string
 	ros::Publisher input_pub = n.advertise<std_msgs::String>("input_str", 50);
 	std_msgs::String inp;
 	while(ros::ok())
 	{	
+		// Read input
 		std::cin>>input_string;
-		inp.data = input_string;
-		input_pub.publish(inp);
-
+		// If it is not valid, notify
+		if (!(input_string.compare("ENC") == 0) && !(input_string.compare("IMU") == 0))
+		{
+			ROS_INFO("INVALID SOURCE");
+		}else{
+			// If it is valid, publish the input
+			inp.data = input_string;
+			input_pub.publish(inp);
+		}
+		
 	}
 
 	return 0;

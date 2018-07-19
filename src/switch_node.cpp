@@ -30,9 +30,11 @@ std::string prev_switch_string = "ENC";
 
 void poseListenerENC(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
+	// Read the incoming pose
 	static tf::TransformBroadcaster br;
 	geometry_msgs::TransformStamped ENC;
 
+	// If chosen source is only encoder, put the pose to a transformation frame and publish it
 	if (switch_string.compare("ENC") == 0)
 	{
 		ENC.header.stamp = msg->header.stamp;
@@ -53,7 +55,7 @@ void poseListenerIMU(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
 	static tf::TransformBroadcaster br;		
 	geometry_msgs::TransformStamped IMU;
-
+	// If chosen sources are encoder and IMU, put the pose to a transformation frame and publish it
 	if(switch_string.compare("IMU") == 0)
 	{
 		IMU.header.stamp = msg->header.stamp;
@@ -74,6 +76,7 @@ void poseListenerIMU(const geometry_msgs::PoseStamped::ConstPtr& msg)
 
 void inputListener(const std_msgs::String::ConstPtr& msg)
 {
+	// Listen incoming input
 	switch_string = msg->data;
 }
 
