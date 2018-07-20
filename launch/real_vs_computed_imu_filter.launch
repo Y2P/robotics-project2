@@ -1,0 +1,20 @@
+<launch>
+
+
+	<param name="use_sim_time" value="true" />
+    <node pkg="project_2" type="viz_real" name=""/> 
+	<node pkg="project_2" type="pub_laser" name=""/>
+	<node pkg="project_2" type="viz_codom" name=""/>
+    <node pkg="project_2" type="viz_codom_imu" name=""/>
+    <node pkg="project_2" type="switch" name=""/>    
+	<node pkg="rosbag" type="play" name="rosbag" args=" --clock $(find project_2)/bags/imu_bag.bag"/>
+    <node pkg="tf" type="static_transform_publisher" name="link2_broadcaster" args="0 0 0 0 0 0 1 initial_pos computed_odom 100"/>
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
+	    <param name="fixed_frame" value="new_odom" />
+	    <param name="use_mag" value="false" />
+	    <param name="constant_dt" value="0.01" />
+	    <param name="use_magnetic_field_msg" value="false" />
+	    <remap from="imu/data_raw" to="imu"/>
+ 	</node>
+
+</launch>
