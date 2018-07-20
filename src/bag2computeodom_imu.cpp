@@ -65,6 +65,7 @@ double complementary_theta = 0;
 double unbiased_acc_y,unbiased_acc_z,g_min = 3.5;
 double delta_theta = 0;
 
+// Averaging filter
 double queueAvg(std::queue<double> myqueue)
 {
 	int size = myqueue.size();
@@ -233,10 +234,17 @@ int main(int argc, char **argv)
 					}
 					thetadot_avg = queueAvg(thetadot_queue);
 					*/
+
+
+					// Debiasing the data source from IMU
 					unbiased_acc_y = acc_y + 1.568076;
 					unbiased_acc_z = acc_z + 0.005081;
+
+					// Selecting g values above the threshold.
+					// It allows us to add the IMU accelometer effect when it is important enough.
 					if((fabs(unbiased_acc_y) + fabs(unbiased_acc_z)) >= g_min )
 					{
+						// Complementary filter calculation based on gain values for each source.
 						complementary_theta = atan2(acc_y,acc_z);
 						delta_theta = (thetadot*dt_imu)*(gain) + (1-gain)*complementary_theta;	
 						theta += Kp_rot*delta_theta; 
